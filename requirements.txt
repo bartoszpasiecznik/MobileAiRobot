@@ -1,0 +1,8 @@
+setproctitle
+opencv-python
+numpy
+RPI.GPIO
+pyserial
+tflite-runtime
+Pillow
+Flask
