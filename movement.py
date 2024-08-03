@@ -1,4 +1,4 @@
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 GPIO.setwarnings(False)
 
 import os, time
@@ -14,3 +14,6 @@ def right():
 
 def left():
     print("Moving left")
+
+def stop():
+    print("STOP")
