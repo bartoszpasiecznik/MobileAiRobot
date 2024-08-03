@@ -1,0 +1,6 @@
+hailort.log
+__pycache__/
+cpp/
+build.release/
+resources/
+venv_MobileAiRobot/
