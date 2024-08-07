@@ -1,5 +1,3 @@
-import common as cm
-import movement as mv
 import cv2
 import numpy as np
 from PIL import Image
@@ -35,6 +33,8 @@ global x_deviation, y_max, tolerance
 object_to_track = "person"
 tolerance = 0.1
 
+USB_PORT = "/dev/ttyAMA0"
+
 
 
 # -----------------------------------------------------------------------------------------------
@@ -49,21 +49,73 @@ class user_app_callback_class(app_callback_class):
     def new_function(self):  # New function example
         return "The meaning of life is: "
     
+    def move_back():
+        # print("Moving Back")
+        ser.write(b"backward\n")
+        line = ser.readline().decode('utf-8').rstrip()
+        print(line)
+
+    def move_forward():
+        # print("Moving forward")
+        ser.write(b"forward\n")
+        line = ser.readline().decode('utf-8').rstrip()
+        print(line)
+
+    def move_right():
+        # print("Moving right")
+        ser.write(b"right\n")
+        line = ser.readline().decode('utf-8').rstrip()
+        print(line)
+
+    def move_left():
+        # print("Moving left")
+        ser.write(b"left\n")
+        line = ser.readline().decode('utf-8').rstrip()
+        print(line)
+
+    def stop():
+        # print("STOP")
+        ser.write(b"stop\n")
+        line = ser.readline().decode('utf-8').rstrip()
+        print(line)
+
+
     def move_robot(y_max, x_deviation):
         y = 1 - y_max
-
+        print(y_max)
+        print(y)
         if (abs(x_deviation) < tolerance):
-            if (y < 0.1):
-                mv.stop()
+            if (y < 0.25):
+                user_app_callback_class.stop()
+                
             else:
-                mv.forward()
+                user_app_callback_class.move_forward()
         
         else:
             if(x_deviation >= tolerance):
-                mv.left()
+                delay = user_app_callback_class.get_delay(x_deviation)
+                user_app_callback_class.move_left()
+                time.sleep(delay)
+                user_app_callback_class.stop()
             
             if(x_deviation<=-1*tolerance):
-                mv.right()
+                delay = user_app_callback_class.get_delay(x_deviation)
+                user_app_callback_class.move_right()
+                time.sleep(delay)
+                user_app_callback_class.stop()
+
+    def get_delay(deviation):
+        deviation = abs(deviation)
+        if(deviation>=0.4):
+            d=0.080
+        elif(deviation>=0.35 and deviation<0.40):
+            d=0.060
+        elif(deviation>=0.20 and deviation<0.35):
+            d=0.050
+        else:
+            d=0.040
+        
+        return d
 
         
 
@@ -215,7 +267,7 @@ class GStreamerDetectionApp(GStreamerApp):
                 f"video/x-raw, format={self.network_format}, width=1536, height=864 ! "
                 + QUEUE("queue_src_scale")
                 + "videoscale ! "
-                f"video/x-raw, format={self.network_format}, width={self.network_width}, height={self.network_height}, framerate=30/1 ! "
+                f"video/x-raw, format={self.network_format}, width={self.network_width}, height={self.network_height}, framerate=10/1 ! "
             )
         elif self.source_type == "usb":
             source_element = (
@@ -284,22 +336,16 @@ if __name__ == "__main__":
         default=None,
         help="Path to costume labels JSON file",
     )
+    
+
+    try:
+        ser = serial.Serial(USB_PORT, 9600, timeout= 2)
+    except:
+        print("ERROR - could not open USB serial port. Please check your port name and permissions.")
+        print("Exiting program.")
+        exit()
+    
+
     args = parser.parse_args()
     app = GStreamerDetectionApp(args, user_data)
     app.run()
-
-
-
-
-
-USB_PORT = "/dev/ttyAMA0"
-
-
-
-try:
-        usb = serial.Serial(USB_PORT, 9600, timeout= 2)
-except:
-    print("ERROR - could not open USB serial port. Please check your port name and permissions.")
-    print("Exiting program.")
-    exit()
-

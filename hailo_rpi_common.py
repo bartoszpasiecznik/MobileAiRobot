@@ -76,7 +76,7 @@ def display_user_data_frame(user_data: app_callback_class):
 def get_default_parser():
     parser = argparse.ArgumentParser(description="Hailo App Help")
     parser.add_argument(
-        "--input", "-i", type=str, default="/dev/video0",
+        "--input", "-i", type=str, default="rpi",
         help="Input source. Can be a file, USB or RPi camera (CSI camera module). \
         For RPi camera use '-i rpi' (Still in Beta). \
         Defaults to /dev/video0"

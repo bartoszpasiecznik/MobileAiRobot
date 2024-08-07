@@ -1,6 +1,3 @@
-
-// d11 prawy d12 lewy
-
 int motorSpeedPinR = 11; //Right motor speed
 int motorSpeedPinL = 6; //Left motor speed
 
@@ -19,6 +16,7 @@ int fwdright7 = 8;      //Forward motion of Right motor
 
 
 long duration, distance;
+String command;
 
 
 void setup() {
@@ -44,92 +42,87 @@ void setup() {
 
 
   analogWrite(motorSpeedPinR, 100);
-  analogWrite(motorSpeedPinL, 125);
+  analogWrite(motorSpeedPinL, 100);
 
 
 }
 
+void loop(){
 
-void loop() {
+  if (Serial.available()){
+    command = Serial.readStringUntil('\n');
+    command.trim();
 
+    if (command.equals("forward")){
+      Serial.println("Moving Forward");
+      digitalWrite(fwdright7, HIGH);                    // move forward
 
+      digitalWrite(revright6, LOW);
 
-  digitalWrite(trigPin, LOW);
+      digitalWrite(fwdleft5, HIGH);                                
 
-  delayMicroseconds(2);   
+      digitalWrite(revleft4, LOW); 
+      
+    }
 
-  digitalWrite(trigPin, HIGH);     // send waves for 10 us
+    else if (command.equals("backward")){
+      Serial.println("Moving Backward");
+      digitalWrite(fwdright7, LOW);      //movebackword         
 
-  delayMicroseconds(10);
+      digitalWrite(revright6, HIGH);
 
-  duration = pulseIn(echoPin, HIGH); // receive reflected waves
+      digitalWrite(fwdleft5, LOW);                                
 
-  distance = duration / 58.2;   // convert to distance
+      digitalWrite(revleft4, HIGH);
+      
+    }
 
-  delay(10);
+    else if (command.equals("left")){
+      Serial.println("Moving Left");
+      digitalWrite(fwdright7, LOW);                    // move left
 
-    // If you dont get proper movements of your robot then alter the pin numbers
+      digitalWrite(revright6, LOW);
 
-  if (distance > 19)            
+      digitalWrite(fwdleft5, HIGH);                                
 
-  {
+      digitalWrite(revleft4, HIGH); 
+      
+    }
 
-    digitalWrite(fwdright7, HIGH);                    // move forward
+    else if (command.equals("right")){
+      Serial.println("Moving Right");
+      digitalWrite(fwdright7, HIGH);                    // move right
 
-    digitalWrite(revright6, LOW);
+      digitalWrite(revright6, HIGH);
 
-    digitalWrite(fwdleft5, HIGH);                                
+      digitalWrite(fwdleft5, LOW);                                
 
-    digitalWrite(revleft4, LOW);                                                       
+      digitalWrite(revleft4, LOW); 
+      
+    }
 
+    else if (command.equals("stop")){
+      Serial.println("STOPPING");
+      digitalWrite(fwdright7, LOW);  //Stop                
+
+      digitalWrite(revright6, LOW);
+
+      digitalWrite(fwdleft5, LOW);                                
+
+      digitalWrite(revleft4, LOW);
+      
+    }
+
+    else{
+      Serial.println("Wrong command");
+      digitalWrite(fwdright7, LOW);  //Stop                
+
+      digitalWrite(revright6, LOW);
+
+      digitalWrite(fwdleft5, LOW);                                
+
+      digitalWrite(revleft4, LOW);
+
+    }
   }
-
-
-  if (distance < 18)
-
-  {
-
-    digitalWrite(fwdright7, LOW);  //Stop                
-
-    digitalWrite(revright6, LOW);
-
-    digitalWrite(fwdleft5, LOW);                                
-
-    digitalWrite(revleft4, LOW);
-
-    delay(500);
-
-    digitalWrite(fwdright7, LOW);      //movebackword         
-
-    digitalWrite(revright6, HIGH);
-
-    digitalWrite(fwdleft5, LOW);                                
-
-    digitalWrite(revleft4, HIGH);
-
-    delay(500);
-
-    digitalWrite(fwdright7, LOW);  //Stop                
-
-    digitalWrite(revright6, LOW);
-
-    digitalWrite(fwdleft5, LOW);                                
-
-    digitalWrite(revleft4, LOW);  
-
-    delay(100);  
-
-    digitalWrite(fwdright7, HIGH);       
-
-    digitalWrite(revright6, LOW);   
-
-    digitalWrite(revleft4, LOW);                                 
-
-    digitalWrite(fwdleft5, LOW);  
-
-    delay(500);
-
-  }
-
-
 }
