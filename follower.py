@@ -35,8 +35,6 @@ tolerance = 0.1
 
 USB_PORT = "/dev/ttyAMA0"
 
-
-
 # -----------------------------------------------------------------------------------------------
 # User-Defined functions
 # -----------------------------------------------------------------------------------------------
@@ -44,10 +42,6 @@ USB_PORT = "/dev/ttyAMA0"
 class user_app_callback_class(app_callback_class):
     def __init__(self):
         super().__init__()
-        self.new_variable = 42  # New variable example
-    
-    def new_function(self):  # New function example
-        return "The meaning of life is: "
     
     def move_back():
         # print("Moving Back")
@@ -117,13 +111,9 @@ class user_app_callback_class(app_callback_class):
         
         return d
 
-        
-
 # -----------------------------------------------------------------------------------------------
 # User-defined callback function
 # -----------------------------------------------------------------------------------------------
-
-# This is the callback function that will be called when data is available from the pipeline
 def app_callback(pad, info, user_data):
     # Get the GstBuffer from the probe info
     buffer = info.get_buffer()
@@ -147,8 +137,6 @@ def app_callback(pad, info, user_data):
     # Get the detections from the buffer
     roi = hailo.get_roi_from_buffer(buffer)
     detections = roi.get_objects_typed(hailo.HAILO_DETECTION)
-    
-    #KOD DO ROBIENIA CZEGOŚ CO CHCEMY, NP JEDŹ PROSTO, SKRĘĆ ITP. NIE WIEM JAK ZROBIĆ NP ŻEBY TO WSTRZYMAŁO SIĘ NA 100MS
 
     # Parse the detections
     detection_count = 0
@@ -183,21 +171,9 @@ def app_callback(pad, info, user_data):
 
 
             detection_count += 1
-            
-    # if user_data.use_frame:
-    #     # Note: using imshow will not work here, as the callback function is not running in the main thread
-    #     # Let's print the detection count to the frame
-    #     cv2.putText(frame, f"Detections: {detection_count}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    #     # Example of how to use the new_variable and new_function from the user_data
-    #     # Let's print the new_variable and the result of the new_function to the frame
-    #     cv2.putText(frame, f"{user_data.new_function()} {user_data.new_variable}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    #     # Convert the frame to BGR
-    #     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-    #     user_data.set_frame(frame)
 
     print(string_to_print)
     return Gst.PadProbeReturn.OK
-    
 
 # -----------------------------------------------------------------------------------------------
 # User Gstreamer Application
@@ -217,8 +193,6 @@ class GStreamerDetectionApp(GStreamerApp):
         nms_score_threshold = 0.3 
         nms_iou_threshold = 0.45
         
-        # Temporary code: new postprocess will be merged to TAPPAS.
-        # Check if new postprocess so file exists
         new_postprocess_path = os.path.join(self.current_path, './resources/libyolo_hailortpp_post.so')
         if os.path.exists(new_postprocess_path):
             self.default_postprocess_so = new_postprocess_path
@@ -316,10 +290,8 @@ class GStreamerDetectionApp(GStreamerApp):
         return pipeline_string
 
 if __name__ == "__main__":
-    # Create an instance of the user app callback class
     user_data = user_app_callback_class()
     parser = get_default_parser()
-    # Add additional arguments here
     parser.add_argument(
         "--network",
         default="yolov8s",
@@ -336,7 +308,6 @@ if __name__ == "__main__":
         default=None,
         help="Path to costume labels JSON file",
     )
-    
 
     try:
         ser = serial.Serial(USB_PORT, 9600, timeout= 2)
@@ -346,6 +317,20 @@ if __name__ == "__main__":
         exit()
     
 
-    args = parser.parse_args()
-    app = GStreamerDetectionApp(args, user_data)
-    app.run()
+    print("Please choose operating type:")
+    print("1 = Autonomous")
+    print("2 = Follower")
+
+    operatingType = input("Chosen Operating Type: ")
+
+    if operatingType == 1:
+        ser.write(b"auto\n")
+    
+    elif operatingType == 2:
+        ser.write(b"follow\n")
+        args = parser.parse_args()
+        app = GStreamerDetectionApp(args, user_data)
+        app.run()
+    
+    else:
+        print("Wrong type, please input 1 or 2 to choose operating type")
